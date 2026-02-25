@@ -385,7 +385,7 @@ export default function Home() {
       <video
         controls
         className="w-full h-full object-cover rounded-lg"
-        src="/videos/tommy_shelby.mp4"
+        src="/videos/lil_street.mp4"
       >
         Your browser does not support the video tag.
       </video>
@@ -393,7 +393,7 @@ export default function Home() {
       {/* Centered Download */}
       <div className="mt-2 flex justify-center w-full">
         <a
-          href="/videos/tommy_shelby.mp4"
+          href="/videos/lil_street.mp4"
           download
           className="inline-block text-red-500 hover:underline"
         >
@@ -411,7 +411,7 @@ export default function Home() {
       <video
         controls
         className="w-full h-full object-cover rounded-lg"
-        src="/videos/peaky_blinder.mp4"
+        src="/videos/lilly.mp4"
       >
         Your browser does not support the video tag.
       </video>
@@ -419,7 +419,7 @@ export default function Home() {
       {/* Centered Download */}
       <div className="mt-2 flex justify-center w-full">
         <a
-          href="/videos/peaky_blinder.mp4"
+          href="/videos/lilly.mp4"
           download
           className="inline-block text-red-500 hover:underline"
         >
