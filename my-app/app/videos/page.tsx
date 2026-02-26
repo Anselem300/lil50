@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
@@ -12,7 +13,7 @@ const fadeUp = {
 
 type VideoWithId = {
   id: number;
-  title: string;
+  title: string | null;
   description: string | null;
   fileUrl: string;
   createdAt: string;
@@ -39,7 +40,6 @@ export default function VideosPage() {
           setFilteredVideos([]);
           return;
         }
-
         const data = await res.json();
         setVideos(data.videos || []);
         setFilteredVideos(data.videos || []);
@@ -59,7 +59,7 @@ export default function VideosPage() {
     if (!search.trim()) setFilteredVideos(videos);
     else
       setFilteredVideos(
-        videos.filter((v) => v.title.toLowerCase().includes(search.toLowerCase()))
+        videos.filter((v) => v.title?.toLowerCase().includes(search.toLowerCase()))
       );
   }, [search, videos]);
 
@@ -75,7 +75,8 @@ export default function VideosPage() {
   const handleShare = (video: VideoWithId) => {
     const videoUrl = `${window.location.origin}/videos?videoId=${video.id}`;
     if (navigator.share) {
-      navigator.share({ title: video.title, text: `Check out this video: ${video.title}`, url: videoUrl })
+      navigator
+        .share({ title: video.title || "Video", text: `Check out this video: ${video.title}`, url: videoUrl })
         .catch((err) => console.error("Error sharing:", err));
     } else {
       navigator.clipboard.writeText(videoUrl);
@@ -85,16 +86,27 @@ export default function VideosPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Load AdSense script */}
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4188387479952764"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+
       {/* Header */}
       <header className="border-b border-zinc-800 relative">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <h1 className="text-xl font-bold tracking-widest">LIL 50</h1>
+
+          {/* Desktop Nav */}
           <nav className="hidden gap-8 text-sm uppercase tracking-wide md:flex">
             <Link href="/" className="hover:text-red-500 transition">Home</Link>
             <Link href="/music" className="hover:text-red-500 transition">Music</Link>
             <Link href="#videos" className="text-red-500 font-bold transition">Videos</Link>
-            <Link href="#contact" className="hover:text-red-500 transition">Booking</Link>
           </nav>
+
+          {/* Mobile Hamburger */}
           <button onClick={() => setMenuOpen(true)} className="md:hidden flex flex-col gap-1">
             <span className="h-[2px] w-6 bg-white"></span>
             <span className="h-[2px] w-6 bg-white"></span>
@@ -122,9 +134,8 @@ export default function VideosPage() {
               >
                 <button onClick={() => setMenuOpen(false)} className="self-end text-white text-xl">✕</button>
                 <Link href="/" onClick={() => setMenuOpen(false)} className="hover:text-red-500 transition">Home</Link>
-                <Link href="#music" onClick={() => setMenuOpen(false)} className="hover:text-red-500 transition">Music</Link>
+                <Link href="/music" onClick={() => setMenuOpen(false)} className="hover:text-red-500 transition">Music</Link>
                 <Link href="#videos" onClick={() => setMenuOpen(false)} className="text-red-500 font-bold transition">Videos</Link>
-                <Link href="#contact" onClick={() => setMenuOpen(false)} className="hover:text-red-500 transition">Booking</Link>
               </motion.div>
             </>
           )}
@@ -143,9 +154,7 @@ export default function VideosPage() {
       >
         <div className="mb-12 flex items-center justify-between">
           <h3 className="text-3xl font-bold uppercase tracking-wide">Videos</h3>
-          <Link href="/" className="text-sm text-zinc-400 hover:text-white transition-colors">
-            ← Back to Home
-          </Link>
+          <Link href="/" className="text-sm text-zinc-400 hover:text-white transition-colors">← Back to Home</Link>
         </div>
 
         <div className="mb-8">
@@ -164,22 +173,42 @@ export default function VideosPage() {
           <p className="text-white text-center">No videos found.</p>
         ) : (
           <div className="grid gap-8 md:grid-cols-2">
-            {filteredVideos.map((video) => (
-              <motion.div
-                key={video.id}
-                whileHover={{ scale: 1.03 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="group relative aspect-video bg-zinc-800 flex flex-col items-center justify-center overflow-hidden rounded-lg p-4"
-              >
-                <video controls className="w-full aspect-video object-cover rounded-lg" src={video.fileUrl}>
-                  Your browser does not support the video tag.
-                </video>
+            {filteredVideos.map((video, index) => (
+              <div key={video.id}>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                  className="group relative aspect-video bg-zinc-800 flex flex-col items-center justify-center overflow-hidden rounded-lg p-4"
+                >
+                  <video controls className="w-full aspect-video object-cover rounded-lg" src={video.fileUrl}>
+                    Your browser does not support the video tag.
+                  </video>
 
-                <div className="mt-2 flex justify-center gap-4 w-full">
-                  <a href={video.fileUrl} download className="inline-block text-red-500 hover:underline">Download</a>
-                  <button onClick={() => handleShare(video)} className="inline-block text-red-500 hover:underline">Share</button>
-                </div>
-              </motion.div>
+                  <div className="mt-2 flex justify-center gap-4 w-full">
+                    <a href={video.fileUrl} download className="inline-block text-red-500 hover:underline">Download</a>
+                    <button onClick={() => handleShare(video)} className="inline-block text-red-500 hover:underline">Share</button>
+                  </div>
+                </motion.div>
+
+                {/* AdSense after every 3 videos */}
+                {index > 0 && (index + 1) % 3 === 0 && (
+                  <div className="my-4 w-full">
+                    <ins
+                      className="adsbygoogle"
+                      style={{ display: "block" }}
+                      data-ad-client="ca-pub-4188387479952764"
+                      data-ad-slot="1936850158"
+                      data-ad-format="auto"
+                      data-full-width-responsive="true"
+                    ></ins>
+                    <Script
+                      id={`adsense-${index}`}
+                      strategy="afterInteractive"
+                      dangerouslySetInnerHTML={{ __html: `(adsbygoogle = window.adsbygoogle || []).push({});` }}
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
@@ -29,22 +30,18 @@ export default function MusicPage() {
   const searchParams = useSearchParams();
   const songIdParam = searchParams?.get("songId");
 
-  // Fetch songs safely
   useEffect(() => {
     async function fetchSongs() {
       try {
         const res = await fetch("/api/songs");
-
         if (!res.ok) {
           console.error("Failed to fetch songs, status:", res.status);
           setSongs([]);
           setFilteredSongs([]);
           return;
         }
-
         const text = await res.text();
         const data = text ? JSON.parse(text) : { songs: [] };
-
         setSongs(data.songs || []);
         setFilteredSongs(data.songs || []);
       } catch (err) {
@@ -55,39 +52,29 @@ export default function MusicPage() {
         setLoading(false);
       }
     }
-
     fetchSongs();
   }, []);
 
-  // Filter songs when search changes
   useEffect(() => {
-    if (!search.trim()) {
-      setFilteredSongs(songs);
-    } else {
+    if (!search.trim()) setFilteredSongs(songs);
+    else
       setFilteredSongs(
         songs.filter((song) =>
           song.title.toLowerCase().includes(search.toLowerCase())
         )
       );
-    }
   }, [search, songs]);
 
-  // Auto-show a song if shared via URL
   useEffect(() => {
     if (songIdParam && songs.length > 0) {
       const songToPlay = songs.find((s) => s.id.toString() === songIdParam);
-      if (songToPlay) {
-        setFilteredSongs([songToPlay]);
-      }
+      if (songToPlay) setFilteredSongs([songToPlay]);
     }
   }, [songIdParam, songs]);
 
-  // Share handler
   const handleShare = (song: SongWithId) => {
     try {
-      // Use site URL with songId query param
       const songUrl = `${window.location.origin}/music?songId=${song.id}`;
-
       if (navigator.share) {
         navigator
           .share({
@@ -108,6 +95,14 @@ export default function MusicPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Load AdSense script */}
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4188387479952764"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+
       {/* Header */}
       <header className="border-b border-zinc-800 relative">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
@@ -123,9 +118,6 @@ export default function MusicPage() {
             </Link>
             <Link href="/videos" className="hover:text-red-500 transition">
               Videos
-            </Link>
-            <Link href="/#contact" className="hover:text-red-500 transition">
-              Booking
             </Link>
           </nav>
 
@@ -151,7 +143,6 @@ export default function MusicPage() {
                 exit={{ opacity: 0 }}
                 onClick={() => setMenuOpen(false)}
               />
-
               <motion.div
                 className="fixed top-0 right-0 h-full w-64 bg-zinc-900 z-50 p-8 flex flex-col gap-6 uppercase tracking-wide"
                 initial={{ x: "100%" }}
@@ -159,6 +150,7 @@ export default function MusicPage() {
                 exit={{ x: "100%" }}
                 transition={{ type: "tween", duration: 0.3 }}
               >
+                {/* Close button */}
                 <button
                   onClick={() => setMenuOpen(false)}
                   className="self-end text-white text-xl"
@@ -172,11 +164,8 @@ export default function MusicPage() {
                 <Link href="#music" onClick={() => setMenuOpen(false)} className="text-red-500 font-bold transition">
                   Music
                 </Link>
-                <Link href="#videos" onClick={() => setMenuOpen(false)} className="hover:text-red-500 transition">
+                <Link href="/videos" onClick={() => setMenuOpen(false)} className="hover:text-red-500 transition">
                   Videos
-                </Link>
-                <Link href="#contact" onClick={() => setMenuOpen(false)} className="hover:text-red-500 transition">
-                  Booking
                 </Link>
               </motion.div>
             </>
@@ -195,20 +184,15 @@ export default function MusicPage() {
         transition={{ duration: 0.8, delay: 0.2 }}
       >
         <div className="mx-auto max-w-6xl px-6">
-          {/* Heading + Back */}
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-3xl font-bold uppercase tracking-wide text-white">
               Latest Releases
             </h3>
-            <Link
-              href="/"
-              className="text-sm text-zinc-400 hover:text-white transition-colors"
-            >
+            <Link href="/" className="text-sm text-zinc-400 hover:text-white transition-colors">
               ← Back to Home
             </Link>
           </div>
 
-          {/* Search */}
           <div className="mb-8">
             <input
               type="text"
@@ -225,46 +209,57 @@ export default function MusicPage() {
             <p className="text-white text-center">No songs found.</p>
           ) : (
             <div className="grid gap-8 md:grid-cols-3">
-              {filteredSongs.map((song) => (
-                <div
-                  key={song.id}
-                  className="relative rounded-lg bg-zinc-900 p-6 flex flex-col justify-between overflow-hidden"
-                  style={{
-                    backgroundImage: `url("${song.coverUrl ?? "/images/default_cover.jpg"}")`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black/50"></div>
-                  <div className="relative z-10 flex flex-col">
-                    <h4 className="text-xl font-semibold text-white">{song.title}</h4>
-                    {song.description && (
-                      <p className="mt-2 text-white/80">{song.description}</p>
-                    )}
-                    <audio
-                      controls
-                      className="mt-4 w-full rounded bg-black/50"
-                      src={song.fileUrl}
-                      preload="none"
-                    >
-                      Your browser does not support the audio element.
-                    </audio>
-                    <div className="mt-2 flex justify-center gap-4">
-                      <a
-                        href={song.fileUrl}
-                        download
-                        className="inline-block text-red-500 hover:underline"
+              {filteredSongs.map((song, index) => (
+                <div key={song.id}>
+                  <div
+                    className="relative rounded-lg bg-zinc-900 p-6 flex flex-col justify-between overflow-hidden"
+                    style={{
+                      backgroundImage: `url("${song.coverUrl ?? "/images/default_cover.jpg"}")`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/50"></div>
+                    <div className="relative z-10 flex flex-col">
+                      <h4 className="text-xl font-semibold text-white">{song.title}</h4>
+                      {song.description && <p className="mt-2 text-white/80">{song.description}</p>}
+                      <audio
+                        controls
+                        className="mt-4 w-full rounded bg-black/50"
+                        src={song.fileUrl}
+                        preload="none"
                       >
-                        Download
-                      </a>
-                      <button
-                        onClick={() => handleShare(song)}
-                        className="inline-block text-red-500 hover:underline"
-                      >
-                        Share
-                      </button>
+                        Your browser does not support the audio element.
+                      </audio>
+                      <div className="mt-2 flex justify-center gap-4">
+                        <a href={song.fileUrl} download className="inline-block text-red-500 hover:underline">
+                          Download
+                        </a>
+                        <button onClick={() => handleShare(song)} className="inline-block text-red-500 hover:underline">
+                          Share
+                        </button>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Responsive AdSense after every 3 songs */}
+                  {index > 0 && (index + 1) % 3 === 0 && (
+                    <div className="my-4 w-full">
+                      <ins
+                        className="adsbygoogle"
+                        style={{ display: "block" }}
+                        data-ad-client="ca-pub-4188387479952764"
+                        data-ad-slot="1936850158"
+                        data-ad-format="auto"
+                        data-full-width-responsive="true"
+                      ></ins>
+                      <Script
+                        id={`adsense-${index}`}
+                        strategy="afterInteractive"
+                        dangerouslySetInnerHTML={{ __html: `(adsbygoogle = window.adsbygoogle || []).push({});` }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
