@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
-// Singleton pattern for Prisma (prevents too many connections in dev)
-let prisma: PrismaClient;
-if (!globalThis.prisma) {
-  globalThis.prisma = new PrismaClient();
-}
-prisma = globalThis.prisma;
+// Simple Prisma client instance (like your videos route)
+const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ songs });
   } catch (err) {
-    console.error("Error fetching songs from DB:", err);
+    console.error("Error fetching songs:", err);
     return NextResponse.json({ songs: [] }, { status: 500 });
   }
 }
