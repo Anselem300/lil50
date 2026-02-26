@@ -134,16 +134,16 @@ export default function Home() {
 
             <div className="mt-8 flex gap-4">
               <Link
-                href="#music"
+                href="/music"
                 className="rounded-full bg-red-600 px-8 py-3 font-semibold uppercase tracking-wide transition hover:bg-red-700"
               >
                 Stream Now
               </Link>
               <Link
-                href="#contact"
+                href="/admin/login"
                 className="rounded-full border border-white px-8 py-3 uppercase tracking-wide transition hover:bg-white hover:text-black"
               >
-                Book Show
+                Sign up
               </Link>
             </div>
           </div>
@@ -384,7 +384,7 @@ export default function Home() {
     >
       <video
         controls
-        className="w-full h-full object-cover rounded-lg"
+        className="w-full aspect-video object-cover rounded-lg"
         src="/videos/lil_street.mp4"
       >
         Your browser does not support the video tag.
@@ -410,7 +410,7 @@ export default function Home() {
     >
       <video
         controls
-        className="w-full h-full object-cover rounded-lg"
+        className="w-full aspect-video object-cover rounded-lg"
         src="/videos/lilly.mp4"
       >
         Your browser does not support the video tag.
@@ -449,7 +449,7 @@ export default function Home() {
           </p>
 
           <a
-            href="mailto:booking@lil50.com"
+            href="mailto:sprosper151@gmail.com"
             className="mt-6 inline-block rounded-full bg-black px-8 py-3 font-semibold text-white transition hover:bg-zinc-900"
           >
             Contact Management
